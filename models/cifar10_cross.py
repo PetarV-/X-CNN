@@ -1,21 +1,11 @@
-'''Train a simple deep CNN on the CIFAR10 small images dataset.
-GPU run command:
-    THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX=float32 python cifar10_cnn.py
-It gets down to 0.65 test logloss in 25 epochs, and down to 0.55 after 50 epochs.
-(it's still underfitting at that point, though).
-Note: the data was pickled with Python 2, and some encoding issues might prevent you
-from loading it in Python 3. You might have to load it in Python 2,
-save it in a different format, load it in Python 3 and repickle it.
-'''
-
 from __future__ import print_function
-from keras.datasets import cifar10
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
+from keras.models import Model
 from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
 from keras.optimizers import SGD
-from keras.utils import np_utils
+from utils.preprocess import get_cifar
 
 batch_size = 32
 nb_classes = 10
@@ -28,38 +18,50 @@ img_rows, img_cols = 32, 32
 img_channels = 3
 
 # the data, shuffled and split between train and test sets
-(X_train, y_train), (X_test, y_test) = cifar10.load_data()
+(X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
+
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
 
-# convert class vectors to binary class matrices
-Y_train = np_utils.to_categorical(y_train, nb_classes)
-Y_test = np_utils.to_categorical(y_test, nb_classes)
+#cross-connections between two conv layers, Y is the middle layer, while U and V are side layers.
 
-model = Sequential()
+inputYUV = Input(shape=(3, 32, 32))
 
-model.add(Convolution2D(32, 3, 3, border_mode='same',
-                        input_shape=(img_channels, img_rows, img_cols)))
-model.add(Activation('relu'))
-model.add(Convolution2D(32, 3, 3))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# To simplify the data augmentation, I delay slicing until this point.
+# Not sure if there is a better way to handle it. ---Petar
+inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
+inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
+inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
 
-model.add(Convolution2D(64, 3, 3, border_mode='same'))
-model.add(Activation('relu'))
-model.add(Convolution2D(64, 3, 3))
-model.add(Activation('relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputY)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputU)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputV)
 
-model.add(Flatten())
-model.add(Dense(512))
-model.add(Activation('relu'))
-model.add(Dropout(0.5))
-model.add(Dense(nb_classes))
-model.add(Activation('softmax'))
+U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convU)
+V_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convV)
+Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convY)
+
+Ymap = merge([convY,U_to_Y,V_to_Y], mode='concat', concat_axis=1)
+Umap = merge([convU,Y_to_UV], mode='concat', concat_axis=1)
+Vmap = merge([convV,Y_to_UV], mode='concat', concat_axis=1)
+
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Ymap)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Umap)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Vmap)
+
+poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
+
+concatenate_map=merge([poolY,poolU,poolV], mode='concat', concat_axis=1)
+
+reshape=Flatten()(concatenate_map)
+fc=Dense(512, activation='relu')(reshape)
+fc=Dropout(0.5)(fc)
+out=Dense(nb_classes, activation='softmax')(fc)
+
+model = Model(input=inputYUV, output=out)
 
 # let's train the model using SGD + momentum (how original).
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
