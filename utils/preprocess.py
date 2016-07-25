@@ -11,7 +11,7 @@ def get_cifar(p, append_test, use_c10):
     (X_train, y_train), (X_test, y_test) = cifar10.load_data() if use_c10 else cifar100.load_data()
 
     num_samples = X_train.shape[0]
-    num_classes = 10
+    num_classes = 10 if use_c10 else 100
 
     # Compute how much to retain per class
     cnts = np.full(num_classes, (num_samples // num_classes) * p)
