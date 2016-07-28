@@ -2,7 +2,7 @@ from __future__ import print_function
 from keras.datasets import cifar10, cifar100
 from keras.utils import np_utils
 import numpy as np
-import cv2
+import Image as im
 
 # Will fetch and process CIFAR-10/100, with only p% of the training set returned
 # Can also append the remainder to the test set
@@ -39,8 +39,15 @@ def get_cifar(p, append_test, use_c10):
     y_train = np.delete(y_train, rem, 0)
 
     # convert from RBG to YUV
-    X_train = cv2.cvtColor(X_train, CV_BGR2Luv)
-    X_test = cv2.cvtColor(X_test, CV_BGR2Luv)
+    for i in range(num_samples):
+	img = im.fromarray(np.transpose(X_train[i]))
+	yuv=img.convert('YCbCr')
+	X_train[i]=np.transpose(np.array(yuv))
+
+    for i in range(X_test.shape[0]):
+	img = im.fromarray(np.transpose(X_test[i]))
+	yuv = img.convert('YCbCr')
+	X_test[i]=np.transpose(np.array(yuv))
     
     # convert class vectors to binary class matrices
     Y_train = np_utils.to_categorical(y_train, num_classes)

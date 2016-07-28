@@ -34,25 +34,41 @@ inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
 
-convY = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputY)
-convU = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputU)
-convV = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputV)
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputY)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputU)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputV)
+
+U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convU)
+V_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convV)
+Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convY)
+
+Ymap = merge([convY,U_to_Y,V_to_Y], mode='concat', concat_axis=1)
+Umap = merge([convU,Y_to_UV], mode='concat', concat_axis=1)
+Vmap = merge([convV,Y_to_UV], mode='concat', concat_axis=1)
+
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Ymap)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Umap)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Vmap)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
 poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
-U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolU)
-V_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolV)
-Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolY)
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(poolY)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(poolU)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(poolV)
 
-Ymap = merge([poolY,U_to_Y,V_to_Y], mode='concat', concat_axis=1)
-Umap = merge([poolU,Y_to_UV], mode='concat', concat_axis=1)
-Vmap = merge([poolV,Y_to_UV], mode='concat', concat_axis=1)
+U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convU)
+V_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convV)
+Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(convY)
 
-convY = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Ymap)
-convU = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Umap)
-convV = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Vmap)
+Ymap = merge([convY,U_to_Y,V_to_Y], mode='concat', concat_axis=1)
+Umap = merge([convU,Y_to_UV], mode='concat', concat_axis=1)
+Vmap = merge([convV,Y_to_UV], mode='concat', concat_axis=1)
+
+convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Ymap)
+convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Umap)
+convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(Vmap)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
 poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
