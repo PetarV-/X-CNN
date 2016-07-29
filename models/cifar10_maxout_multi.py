@@ -5,7 +5,7 @@ This is the multilayer variant of the CIFAR-10 maxout network
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
-from keras.layers import Input, Lambda, Dense, Activation, Flatten, merge, MaxoutDense
+from keras.layers import Input, Lambda, Dense, Activation, Flatten, Dropout, merge, MaxoutDense
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
@@ -42,42 +42,52 @@ inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
 
+inputY_drop = Dropout(0.8)(inputY)
+inputU_drop = Dropout(0.8)(inputU)
+inputV_drop = Dropout(0.8)(inputV)
+
 # The first Maxout-Conv layer, split into the three layers
-h0_pad_Y = ZeroPadding2D((4, 4))(inputY)
+h0_pad_Y = ZeroPadding2D((4, 4))(inputY_drop)
 h0_conv_a_Y = Convolution2D(48, 8, 8, border_mode='valid')(h0_pad_Y)
 h0_conv_b_Y = Convolution2D(48, 8, 8, border_mode='valid')(h0_pad_Y)
 h0_conv_Y = merge([h0_conv_a_Y, h0_conv_b_Y], mode='max', concat_axis=1)
 h0_pool_Y = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h0_conv_Y)
+h0_drop_Y = Dropout(0.5)(h0_pool_Y)
 
-h0_pad_U = ZeroPadding2D((4, 4))(inputU)
+h0_pad_U = ZeroPadding2D((4, 4))(inputU_drop)
 h0_conv_a_U = Convolution2D(24, 8, 8, border_mode='valid')(h0_pad_U)
 h0_conv_b_U = Convolution2D(24, 8, 8, border_mode='valid')(h0_pad_U)
 h0_conv_U = merge([h0_conv_a_U, h0_conv_b_U], mode='max', concat_axis=1)
 h0_pool_U = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h0_conv_U)
+h0_drop_U = Dropout(0.5)(h0_pool_U)
 
-h0_pad_V = ZeroPadding2D((4, 4))(inputV)
+h0_pad_V = ZeroPadding2D((4, 4))(inputV_drop)
 h0_conv_a_V = Convolution2D(24, 8, 8, border_mode='valid')(h0_pad_V)
 h0_conv_b_V = Convolution2D(24, 8, 8, border_mode='valid')(h0_pad_V)
 h0_conv_V = merge([h0_conv_a_V, h0_conv_b_V], mode='max', concat_axis=1)
 h0_pool_V = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h0_conv_V)
+h0_drop_V = Dropout(0.5)(h0_pool_V)
 
 # Interlayer connections Y <-> U, Y <-> V; use maxout
-h0_Y_to_UV_a = Convolution2D(48, 1, 1, border_mode='same')(h0_pool_Y)
-h0_Y_to_UV_b = Convolution2D(48, 1, 1, border_mode='same')(h0_pool_Y)
+h0_Y_to_UV_a = Convolution2D(48, 1, 1, border_mode='same')(h0_drop_Y)
+h0_Y_to_UV_b = Convolution2D(48, 1, 1, border_mode='same')(h0_drop_Y)
 h0_Y_to_UV = merge([h0_Y_to_UV_a, h0_Y_to_UV_b], mode='max', concat_axis=1)
+h0_Y_to_UV_drop = Dropout(0.5)(h0_Y_to_UV)
 
-h0_U_to_Y_a = Convolution2D(24, 1, 1, border_mode='same')(h0_pool_U)
-h0_U_to_Y_b = Convolution2D(24, 1, 1, border_mode='same')(h0_pool_U)
+h0_U_to_Y_a = Convolution2D(24, 1, 1, border_mode='same')(h0_drop_U)
+h0_U_to_Y_b = Convolution2D(24, 1, 1, border_mode='same')(h0_drop_U)
 h0_U_to_Y = merge([h0_U_to_Y_a, h0_U_to_Y_b], mode='max', concat_axis=1)
+h0_U_to_Y_drop = Dropout(0.5)(h0_U_to_Y)
 
-h0_V_to_Y_a = Convolution2D(24, 1, 1, border_mode='same')(h0_pool_V)
-h0_V_to_Y_b = Convolution2D(24, 1, 1, border_mode='same')(h0_pool_V)
+h0_V_to_Y_a = Convolution2D(24, 1, 1, border_mode='same')(h0_drop_V)
+h0_V_to_Y_b = Convolution2D(24, 1, 1, border_mode='same')(h0_drop_V)
 h0_V_to_Y = merge([h0_V_to_Y_a, h0_V_to_Y_b], mode='max', concat_axis=1)
+h0_V_to_Y_drop = Dropout(0.5)(h0_V_to_Y)
 
 # concatenate intra- and inter-layer values
-h0_Y_concat = merge([h0_pool_Y, h0_U_to_Y, h0_V_to_Y], mode='concat', concat_axis=1)
-h0_U_concat = merge([h0_pool_U, h0_Y_to_UV], mode='concat', concat_axis=1)
-h0_V_concat = merge([h0_pool_V, h0_Y_to_UV], mode='concat', concat_axis=1)
+h0_Y_concat = merge([h0_drop_Y, h0_U_to_Y_drop, h0_V_to_Y_drop], mode='concat', concat_axis=1)
+h0_U_concat = merge([h0_drop_U, h0_Y_to_UV_drop], mode='concat', concat_axis=1)
+h0_V_concat = merge([h0_drop_V, h0_Y_to_UV_drop], mode='concat', concat_axis=1)
 
 # The second Maxout-Conv layer, split into three layers
 h1_pad_Y = ZeroPadding2D((3, 3))(h0_Y_concat)
@@ -85,36 +95,42 @@ h1_conv_a_Y = Convolution2D(96, 8, 8, border_mode='valid')(h1_pad_Y)
 h1_conv_b_Y = Convolution2D(96, 8, 8, border_mode='valid')(h1_pad_Y)
 h1_conv_Y = merge([h1_conv_a_Y, h1_conv_b_Y], mode='max', concat_axis=1)
 h1_pool_Y = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h1_conv_Y)
+h1_drop_Y = Dropout(0.5)(h1_pool_Y)
 
 h1_pad_U = ZeroPadding2D((3, 3))(h0_U_concat)
 h1_conv_a_U = Convolution2D(48, 8, 8, border_mode='valid')(h1_pad_U)
 h1_conv_b_U = Convolution2D(48, 8, 8, border_mode='valid')(h1_pad_U)
 h1_conv_U = merge([h1_conv_a_U, h1_conv_b_U], mode='max', concat_axis=1)
 h1_pool_U = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h1_conv_U)
+h1_drop_U = Dropout(0.5)(h1_pool_U)
 
 h1_pad_V = ZeroPadding2D((3, 3))(h0_V_concat)
 h1_conv_a_V = Convolution2D(48, 8, 8, border_mode='valid')(h1_pad_V)
 h1_conv_b_V = Convolution2D(48, 8, 8, border_mode='valid')(h1_pad_V)
 h1_conv_V = merge([h1_conv_a_V, h1_conv_b_V], mode='max', concat_axis=1)
 h1_pool_V = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h1_conv_V)
+h1_drop_V = Dropout(0.5)(h1_pool_V)
 
 # Interlayer connections Y <-> U, Y <-> V; use maxout
-h1_Y_to_UV_a = Convolution2D(96, 1, 1, border_mode='same')(h1_pool_Y)
-h1_Y_to_UV_b = Convolution2D(96, 1, 1, border_mode='same')(h1_pool_Y)
+h1_Y_to_UV_a = Convolution2D(96, 1, 1, border_mode='same')(h1_drop_Y)
+h1_Y_to_UV_b = Convolution2D(96, 1, 1, border_mode='same')(h1_drop_Y)
 h1_Y_to_UV = merge([h1_Y_to_UV_a, h1_Y_to_UV_b], mode='max', concat_axis=1)
+h1_Y_to_UV_drop = Dropout(0.5)(h1_Y_to_UV)
 
-h1_U_to_Y_a = Convolution2D(48, 1, 1, border_mode='same')(h1_pool_U)
-h1_U_to_Y_b = Convolution2D(48, 1, 1, border_mode='same')(h1_pool_U)
+h1_U_to_Y_a = Convolution2D(48, 1, 1, border_mode='same')(h1_drop_U)
+h1_U_to_Y_b = Convolution2D(48, 1, 1, border_mode='same')(h1_drop_U)
 h1_U_to_Y = merge([h1_U_to_Y_a, h1_U_to_Y_b], mode='max', concat_axis=1)
+h1_U_to_Y_drop = Dropout(0.5)(h1_U_to_Y)
 
-h1_V_to_Y_a = Convolution2D(48, 1, 1, border_mode='same')(h1_pool_V)
-h1_V_to_Y_b = Convolution2D(48, 1, 1, border_mode='same')(h1_pool_V)
+h1_V_to_Y_a = Convolution2D(48, 1, 1, border_mode='same')(h1_drop_V)
+h1_V_to_Y_b = Convolution2D(48, 1, 1, border_mode='same')(h1_drop_V)
 h1_V_to_Y = merge([h1_V_to_Y_a, h1_V_to_Y_b], mode='max', concat_axis=1)
+h1_V_to_Y_drop = Dropout(0.5)(h1_V_to_Y)
 
 # concatenate intra- and inter-layer values
-h1_Y_concat = merge([h1_pool_Y, h1_U_to_Y, h1_V_to_Y], mode='concat', concat_axis=1)
-h1_U_concat = merge([h1_pool_U, h1_Y_to_UV], mode='concat', concat_axis=1)
-h1_V_concat = merge([h1_pool_V, h1_Y_to_UV], mode='concat', concat_axis=1)
+h1_Y_concat = merge([h1_drop_Y, h1_U_to_Y_drop, h1_V_to_Y_drop], mode='concat', concat_axis=1)
+h1_U_concat = merge([h1_drop_U, h1_Y_to_UV_drop], mode='concat', concat_axis=1)
+h1_V_concat = merge([h1_drop_V, h1_Y_to_UV_drop], mode='concat', concat_axis=1)
 
 # The third Maxout-Conv layer, split into three layers
 h2_pad_Y = ZeroPadding2D((3, 3))(h1_Y_concat)
@@ -122,26 +138,30 @@ h2_conv_a_Y = Convolution2D(96, 5, 5, border_mode='valid')(h2_pad_Y)
 h2_conv_b_Y = Convolution2D(96, 5, 5, border_mode='valid')(h2_pad_Y)
 h2_conv_Y = merge([h2_conv_a_Y, h2_conv_b_Y], mode='max', concat_axis=1)
 h2_pool_Y = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(h2_conv_Y)
+h2_drop_Y = Dropout(0.5)(h2_pool_Y)
 
 h2_pad_U = ZeroPadding2D((3, 3))(h1_U_concat)
 h2_conv_a_U = Convolution2D(48, 5, 5, border_mode='valid')(h2_pad_U)
 h2_conv_b_U = Convolution2D(48, 5, 5, border_mode='valid')(h2_pad_U)
 h2_conv_U = merge([h2_conv_a_U, h2_conv_b_U], mode='max', concat_axis=1)
 h2_pool_U = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(h2_conv_U)
+h2_drop_U = Dropout(0.5)(h2_pool_U)
 
 h2_pad_V = ZeroPadding2D((3, 3))(h1_V_concat)
 h2_conv_a_V = Convolution2D(48, 5, 5, border_mode='valid')(h2_pad_V)
 h2_conv_b_V = Convolution2D(48, 5, 5, border_mode='valid')(h2_pad_V)
 h2_conv_V = merge([h2_conv_a_V, h2_conv_b_V], mode='max', concat_axis=1)
 h2_pool_V = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(h2_conv_V)
+h2_drop_V = Dropout(0.5)(h2_pool_V)
 
 # Merge and flatten the three layers
-h2_concat = merge([h2_pool_Y, h2_pool_U, h2_pool_V], mode='concat', concat_axis=1)
+h2_concat = merge([h2_drop_Y, h2_drop_U, h2_drop_V], mode='concat', concat_axis=1)
 h2_flat = Flatten()(h2_concat)
 
 # Now the more conventional layers...
 h3 = MaxoutDense(500, nb_feature=5)(h2_flat)
-out = Dense(nb_classes)(h3)
+h3_drop = Dropout(0.5)(h3)
+out = Dense(nb_classes)(h3_drop)
 y = Activation('softmax')(out) 
 
 model = Model(input=inputYUV, output=out)

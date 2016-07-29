@@ -8,7 +8,7 @@ Ref: GitHub: lisa-lab/pylearn2/pylearn2/scripts/papers/maxout/cifar10.yaml
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, Flatten, merge, MaxoutDense
+from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, MaxoutDense
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
@@ -39,22 +39,26 @@ X_test /= 255
 
 inputYUV = Input(shape=(3, 32, 32))
 
+input_drop = Dropout(0.8)(input_drop)
+
 # This model combines many components within a single Maxout-Conv layer.
 # This is layer 1: {pad: 4, num_channels: 96, num_pieces: 2, 
 # kernel: [8, 8], pool: [4, 4], pool_stride: [2, 2]}
-h0_pad = ZeroPadding2D((4, 4))(inputYUV)
+h0_pad = ZeroPadding2D((4, 4))(input_drop)
 h0_conv_a = Convolution2D(96, 8, 8, border_mode='valid')(h0_pad)
 h0_conv_b = Convolution2D(96, 8, 8, border_mode='valid')(h0_pad)
 h0_conv = merge([h0_conv_a, h0_conv_b], mode='max', concat_axis=1)
 h0_pool = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h0_conv)
+h0_drop = Dropout(0.5)(h0_pool)
 
 # This is layer 2: {pad: 3, num_channels: 192, num_pieces: 2,
 # kernel: [8, 8], pool: [4, 4], pool_stride: [2, 2]}
-h1_pad = ZeroPadding2D((3, 3))(h0_pool)
+h1_pad = ZeroPadding2D((3, 3))(h0_drop)
 h1_conv_a = Convolution2D(192, 8, 8, border_mode='valid')(h1_pad)
 h1_conv_b = Convolution2D(192, 8, 8, border_mode='valid')(h1_pad)
 h1_conv = merge([h1_conv_a, h1_conv_b], mode='max', concat_axis=1)
 h1_pool = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h1_conv)
+h1_drop = Dropout(0.5)(h1_pool)
 
 # This is layer 3: {pad: 3, num_channels: 192, num_pieces: 2,
 # kernel: [5, 5], pool: [2, 2], pool_stride: [2, 2]}
@@ -63,11 +67,13 @@ h2_conv_a = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
 h2_conv_b = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
 h2_conv = merge([h2_conv_a, h2_conv_b], mode='max', concat_axis=1)
 h2_pool = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(h2_conv)
-h2_flat = Flatten()(h2_pool)
+h2_drop = Dropout(0.5)(h2_pool)
+h2_flat = Flatten()(h2_drop)
 
 # Now the more conventional layers...
 h3 = MaxoutDense(500, nb_feature=5)(h2_flat)
-out = Dense(nb_classes)(h3)
+h3_drop = Dropout(0.5)(h3)
+out = Dense(nb_classes)(h3_drop)
 y = Activation('softmax')(out) 
 
 model = Model(input=inputYUV, output=out)
