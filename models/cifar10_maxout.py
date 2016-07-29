@@ -76,7 +76,7 @@ h3_drop = Dropout(0.5)(h3)
 out = Dense(nb_classes)(h3_drop)
 y = Activation('softmax')(out) 
 
-model = Model(input=inputYUV, output=out)
+model = Model(input=inputYUV, output=y)
 
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
