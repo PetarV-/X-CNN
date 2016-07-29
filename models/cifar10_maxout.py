@@ -62,7 +62,7 @@ h1_drop = Dropout(0.5)(h1_pool)
 
 # This is layer 3: {pad: 3, num_channels: 192, num_pieces: 2,
 # kernel: [5, 5], pool: [2, 2], pool_stride: [2, 2]}
-h2_pad = ZeroPadding2D((3, 3))(h1_pool)
+h2_pad = ZeroPadding2D((3, 3))(h1_drop)
 h2_conv_a = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
 h2_conv_b = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
 h2_conv = merge([h2_conv_a, h2_conv_b], mode='max', concat_axis=1)
