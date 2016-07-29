@@ -48,7 +48,7 @@ convU = Convolution2D(16, 3, 3, border_mode='same', activation='relu')(convU)
 convV = Convolution2D(16, 3, 3, border_mode='same', activation='relu')(convV)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
 U_to_Y = Convolution2D(16, 1, 1, border_mode='same', activation='relu')(poolU)
