@@ -71,7 +71,7 @@ convU = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(convU)
 convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(convV)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
 concatenate_map=merge([poolY,poolU,poolV], mode='concat', concat_axis=1)
