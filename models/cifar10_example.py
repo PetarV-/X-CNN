@@ -13,6 +13,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
+from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
 batch_size = 32
@@ -20,10 +21,10 @@ nb_classes = 10
 nb_epoch = 200
 data_augmentation = True
 
-# input image dimensions
-img_rows, img_cols = 32, 32
-# the CIFAR10 images are RGB
-img_channels = 3
+# plot the model?
+plot_model = True
+show_shapes = True
+plot_file = 'cifar10_example.png'
 
 # the data, shuffled and split between train and test sets
 (X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
@@ -31,10 +32,15 @@ print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
 
+X_train = X_train.astype('float32')
+X_test = X_test.astype('float32')
+X_train /= 255
+X_test /= 255
+
 model = Sequential()
 
 model.add(Convolution2D(64, 3, 3, border_mode='same',
-                        input_shape=(img_channels, img_rows, img_cols)))
+                        input_shape=(3, 32, 32)))
 model.add(Activation('relu'))
 model.add(Convolution2D(64, 3, 3))
 model.add(Activation('relu'))
@@ -59,10 +65,8 @@ model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
-X_train = X_train.astype('float32')
-X_test = X_test.astype('float32')
-X_train /= 255
-X_test /= 255
+if plot_model:
+    plot(model, show_shapes=show_shapes, to_file=plot_file)
 
 if not data_augmentation:
     print('Not using data augmentation.')
