@@ -108,7 +108,7 @@ h2_concat = merge([h2_pool_Y, h2_pool_U, h2_pool_V], mode='concat', concat_axis=
 h2_flat = Flatten()(h2_concat)
 
 # Now the more conventional layers...
-h3 = MaxoutDense(500, nb_feature=5)(h2_concat)
+h3 = MaxoutDense(500, nb_feature=5)(h2_flat)
 out = Dense(nb_classes)(h3)
 y = Activation('softmax')(out) 
 
