@@ -1,68 +1,60 @@
+'''
+This will attempt to reimplement the CIFAR-10 maxout network
+as described by Goodfellow et al. (2013)
+
+Ref: GitHub: lisa-lab/pylearn2/pylearn2/scripts/papers/maxout/cifar10.yaml
+'''
+
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
-from keras.models import Sequential
 from keras.models import Model
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
+from keras.layers import Input, Dense, Activation, Flatten, merge, MaxoutDense
+from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from utils.preprocess import get_cifar
 
-batch_size = 32
+batch_size = 128
 nb_classes = 10
-nb_epoch = 200
+nb_epoch = 474
 data_augmentation = True
-
-# input image dimensions
-img_rows, img_cols = 32, 32
-# the CIFAR10 images are RGB
-img_channels = 3
 
 # the data, shuffled and split between train and test sets
 (X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
-
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
 
-#cross-connections between two conv layers, Y is the middle layer, while U and V are side layers.
-
 inputYUV = Input(shape=(3, 32, 32))
 
-# To simplify the data augmentation, I delay slicing until this point.
-# Not sure if there is a better way to handle it. ---Petar
-inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
+# This model combines many components within a single Maxout-Conv layer.
+# This is layer 1: {pad: 4, num_channels: 96, num_pieces: 2, 
+# kernel: [8, 8], pool: [4, 4], pool_stride: [2, 2]}
+h0_pad = ZeroPadding2D((4, 4))(inputYUV)
+h0_conv_a = Convolution2D(96, 8, 8, border_mode='valid')(h0_pad)
+h0_conv_b = Convolution2D(96, 8, 8, border_mode='valid')(h0_pad)
+h0_conv = merge([h0_conv_a, h0_conv_b], mode='max', concat_axis=1)
+h0_pool = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h0_conv)
 
-convY = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputY)
-convU = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputU)
-convV = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputV)
+# This is layer 2: {pad: 3, num_channels: 192, num_pieces: 2,
+# kernel: [8, 8], pool: [4, 4], pool_stride: [2, 2]}
+h1_pad = ZeroPadding2D((3, 3))(h0_pool)
+h1_conv_a = Convolution2D(192, 8, 8, border_mode='valid')(h1_pad)
+h1_conv_b = Convolution2D(192, 8, 8, border_mode='valid')(h1_pad)
+h1_conv = merge([h1_conv_a, h1_conv_b], mode='max', concat_axis=1)
+h1_pool = MaxPooling2D(pool_size=(4, 4), strides=(2, 2))(h1_conv)
 
-poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
+# This is layer 3: {pad: 3, num_channels: 192, num_pieces: 2,
+# kernel: [5, 5], pool: [2, 2], pool_stride: [2, 2]}
+h2_pad = ZeroPadding2D((3, 3))(h1_pool)
+h2_conv_a = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
+h2_conv_b = Convolution2D(192, 5, 5, border_mode='valid')(h2_pad)
+h2_conv = merge([h2_conv_a, h2_conv_b], mode='max', concat_axis=1)
+h2_pool = MaxPooling2D(pool_size=(2, 2), strides=(2, 2))(h2_conv)
+h2_flat = Flatten()(h2_pool)
 
-U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolU)
-V_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolV)
-Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolY)
-
-Ymap = merge([poolY,U_to_Y,V_to_Y], mode='concat', concat_axis=1)
-Umap = merge([poolU,Y_to_UV], mode='concat', concat_axis=1)
-Vmap = merge([poolV,Y_to_UV], mode='concat', concat_axis=1)
-
-convY = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Ymap)
-convU = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Umap)
-convV = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Vmap)
-
-poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
-
-concatenate_map=merge([poolY,poolU,poolV], mode='concat', concat_axis=1)
-
-reshape=Flatten()(concatenate_map)
-fc=Dense(512, activation='relu')(reshape)
-fc=Dropout(0.5)(fc)
-out=Dense(nb_classes, activation='softmax')(fc)
+# Now the more conventional layers...
+h3 = MaxoutDense(500, nb_feature=5)(h2_flat)
+out = Dense(nb_classes)(h3)
+y = Activation('softmax')(out) 
 
 model = Model(input=inputYUV, output=out)
 

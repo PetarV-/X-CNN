@@ -4,7 +4,6 @@ from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
-from keras.optimizers import SGD
 from utils.preprocess import get_cifar
 
 batch_size = 32
@@ -78,10 +77,8 @@ out=Dense(nb_classes, activation='softmax')(fc)
 
 model = Model(input=inputYUV, output=out)
 
-# let's train the model using SGD + momentum (how original).
-sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
 model.compile(loss='categorical_crossentropy',
-              optimizer=sgd,
+              optimizer='adam',
               metrics=['accuracy'])
 
 X_train = X_train.astype('float32')
