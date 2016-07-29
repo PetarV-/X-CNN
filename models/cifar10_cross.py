@@ -17,6 +17,9 @@ plot_model = True
 show_shapes = True
 plot_file = 'cifar10_cross.png'
 
+# show the summary?
+show_summary = True
+
 # the data, shuffled and split between train and test sets
 (X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
 
@@ -44,7 +47,7 @@ convU = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputU)
 convV = Convolution2D(32, 5, 5, border_mode='same', activation='relu')(inputV)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
 U_to_Y = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolU)
@@ -60,7 +63,7 @@ convU = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Umap)
 convV = Convolution2D(64, 5, 5, border_mode='same', activation='relu')(Vmap)
 
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
-poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
+poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
 concatenate_map=merge([poolY,poolU,poolV], mode='concat', concat_axis=1)
@@ -75,6 +78,9 @@ model = Model(input=inputYUV, output=out)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
+
+if show_summary:
+    print(model.summary())
 
 if plot_model:
     plot(model, show_shapes=show_shapes, to_file=plot_file)

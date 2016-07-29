@@ -23,6 +23,9 @@ plot_model = True
 show_shapes = True
 plot_file = 'cifar10_maxout.png'
 
+# show the summary?
+show_summary = True
+
 # the data, shuffled and split between train and test sets
 (X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
 print('X_train shape:', X_train.shape)
@@ -72,6 +75,9 @@ model = Model(input=inputYUV, output=out)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
+
+if show_summary:
+    print(model.summary())
 
 if plot_model:
     plot(model, show_shapes=show_shapes, to_file=plot_file)
