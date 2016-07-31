@@ -54,6 +54,10 @@ poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
 poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
 
+poolY = Dropout(0.25)(poolY)
+poolU = Dropout(0.25)(poolU)
+poolV = Dropout(0.25)(poolV)
+
 U_to_Y = Convolution2D(16, 1, 1, border_mode='same', activation='relu')(poolU)
 V_to_Y = Convolution2D(16, 1, 1, border_mode='same', activation='relu')(poolV)
 Y_to_UV = Convolution2D(32, 1, 1, border_mode='same', activation='relu')(poolY)
@@ -76,6 +80,11 @@ convV = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(convV)
 poolY = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convY)
 poolU = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convU)
 poolV = MaxPooling2D((2,2), strides=(2, 2), border_mode='same')(convV)
+
+poolY = Dropout(0.25)(poolY)
+poolU = Dropout(0.25)(poolU)
+poolV = Dropout(0.25)(poolV)
+
 
 concatenate_map=merge([poolY,poolU,poolV], mode='concat', concat_axis=1)
 
