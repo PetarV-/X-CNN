@@ -105,9 +105,9 @@ h6_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_reg
 h6_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h5_U)
 h6_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h5_V)
 
-h7_conv_Y = Convolution2D(96, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_Y)
-h7_conv_U = Convolution2D(48, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_U)
-h7_conv_V = Convolution2D(48, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_V)
+h7_conv_Y = Convolution2D(96, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_conv_Y)
+h7_conv_U = Convolution2D(48, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_conv_U)
+h7_conv_V = Convolution2D(48, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_conv_V)
 
 # Time to merge and reduce!
 h7_conv = merge([h7_conv_Y, h7_conv_U, h7_conv_V], mode='concat', concat_axis=1)
