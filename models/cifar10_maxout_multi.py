@@ -42,9 +42,9 @@ inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
 
-inputY_drop = Dropout(0.8)(inputY)
-inputU_drop = Dropout(0.8)(inputU)
-inputV_drop = Dropout(0.8)(inputV)
+inputY_drop = Dropout(0.2)(inputY)
+inputU_drop = Dropout(0.2)(inputU)
+inputV_drop = Dropout(0.2)(inputV)
 
 # The first Maxout-Conv layer, split into the three layers
 h0_pad_Y = ZeroPadding2D((4, 4))(inputY_drop)

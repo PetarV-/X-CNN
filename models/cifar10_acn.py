@@ -39,7 +39,7 @@ X_test /= 255
 
 inputYUV = Input(shape=(3, 32, 32))
 
-input_drop = Dropout(0.8)(inputYUV)
+input_drop = Dropout(0.2)(inputYUV)
 
 h0_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(input_drop)
 h1_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv)

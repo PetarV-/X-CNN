@@ -39,7 +39,7 @@ X_test /= 255
 
 inputYUV = Input(shape=(3, 32, 32))
 
-input_drop = Dropout(0.8)(inputYUV)
+input_drop = Dropout(0.2)(inputYUV)
 
 # This model combines many components within a single Maxout-Conv layer.
 # This is layer 1: {pad: 4, num_channels: 96, num_pieces: 2, 

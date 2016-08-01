@@ -44,9 +44,9 @@ inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
 inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
 
-inputY_drop = Dropout(0.8)(inputY)
-inputU_drop = Dropout(0.8)(inputU)
-inputV_drop = Dropout(0.8)(inputV)
+inputY_drop = Dropout(0.2)(inputY)
+inputU_drop = Dropout(0.2)(inputU)
+inputV_drop = Dropout(0.2)(inputV)
 
 h0_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(inputY_drop)
 h0_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(inputU_drop)
