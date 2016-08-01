@@ -5,7 +5,7 @@ This is the multilayer variant of the CIFAR-10 All-CNN-C
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge
+from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, Lambda
 from keras.layers import Convolution2D, AveragePooling2D
 from keras.regularizers import l2
 from keras.utils.visualize_util import plot
