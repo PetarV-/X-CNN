@@ -101,6 +101,8 @@ h9_conv = AveragePooling2D(pool_size=(8, 8))(h8_conv)
 h9_flat = Flatten()(h9_conv)
 out = Activation('softmax')(h9_flat)
 
+model = Model(input=inputYUV, output=out)
+
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
