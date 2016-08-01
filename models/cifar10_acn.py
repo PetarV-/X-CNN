@@ -45,14 +45,14 @@ h0_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regul
 h1_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv)
 
 # "Pooling" convolution 1
-h2_conv = Convolution2D(96, 3, 3, border_mode='valid', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv)
+h2_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv)
 h2_drop = Dropout(0.5)(h2_conv)
 
 h3_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h2_drop)
 h4_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h3_conv)
 
 # "Pooling" convolution 2
-h5_conv = Convolution2D(192, 3, 3, border_mode='valid', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv)
+h5_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv)
 h5_drop = Dropout(0.5)(h5_conv)
 
 # Some more convolutions
@@ -61,7 +61,7 @@ h7_conv = Convolution2D(192, 1, 1, border_mode='same', activation='relu', W_regu
 h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h7_conv)
 
 # Now average and softmax
-h9_conv = AveragePooling2D(pool_size=(6, 6))(h8_conv)
+h9_conv = AveragePooling2D(pool_size=(8, 8))(h8_conv)
 h9_flat = Flatten()(h9_conv)
 out = Activation('softmax')(h9_flat)
 
