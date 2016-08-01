@@ -111,7 +111,8 @@ if not data_augmentation:
               batch_size=batch_size,
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
-              shuffle=True)
+              shuffle=True,
+              verbose=2)
 else:
     print('Using real-time data augmentation.')
 
@@ -137,4 +138,5 @@ else:
                         batch_size=batch_size),
                         samples_per_epoch=X_train.shape[0],
                         nb_epoch=nb_epoch,
-                        validation_data=(X_test, Y_test))
+                        validation_data=(X_test, Y_test),
+                        verbose=2)
