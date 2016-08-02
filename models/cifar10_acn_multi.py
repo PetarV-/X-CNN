@@ -8,6 +8,7 @@ from keras.models import Model
 from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, Lambda
 from keras.layers import Convolution2D, AveragePooling2D
 from keras.regularizers import l2
+from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
@@ -121,7 +122,7 @@ out = Activation('softmax')(h9_flat)
 model = Model(input=inputYUV, output=out)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer=Adam(lr=0.0005),
               metrics=['accuracy'])
 
 if show_summary:

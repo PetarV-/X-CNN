@@ -10,6 +10,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
 from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, MaxoutDense
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
+from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
@@ -79,7 +80,7 @@ y = Activation('softmax')(out)
 model = Model(input=inputYUV, output=y)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer=Adam(lr=0.0005),
               metrics=['accuracy'])
 
 if show_summary:

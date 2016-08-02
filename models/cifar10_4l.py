@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
+from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
@@ -96,7 +97,7 @@ out=Dense(nb_classes, activation='softmax')(fc)
 model = Model(input=inputYUV, output=out)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer=Adam(lr=0.0005),
               metrics=['accuracy'])
 
 if show_summary:
