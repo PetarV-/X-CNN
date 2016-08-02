@@ -19,7 +19,7 @@ from utils.preprocess import get_cifar
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 200
+nb_epoch = 300
 data_augmentation = True
 
 # plot the model?
