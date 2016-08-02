@@ -66,7 +66,7 @@ model.add(Dense(nb_classes))
 model.add(Activation('softmax'))
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=Adam(lr=0.0005),
+              optimizer=Adam(lr=0.0001),
               metrics=['accuracy'])
 
 if show_summary:
