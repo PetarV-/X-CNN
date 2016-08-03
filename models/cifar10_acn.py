@@ -8,6 +8,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
 from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge
 from keras.layers import Convolution2D, AveragePooling2D
+from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
@@ -42,24 +43,33 @@ inputYUV = Input(shape=(3, 32, 32))
 
 input_drop = Dropout(0.2)(inputYUV)
 
-h0_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(input_drop)
-h1_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv)
+h0_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(input_drop)
+h0_conv = BatchNormalization()(h0_conv)
+h1_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h0_conv)
+h1_conv = BatchNormalization()(h1_conv)
 
 # "Pooling" convolution 1
-h2_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv)
+h2_conv = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv)
+h2_conv = BatchNormalization()(h2_conv)
 h2_drop = Dropout(0.5)(h2_conv)
 
-h3_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h2_drop)
-h4_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h3_conv)
+h3_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h2_drop)
+h3_conv = BatchNormalization()(h3_conv)
+h4_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h3_conv)
+h4_conv = BatchNormalization()(h4_conv)
 
 # "Pooling" convolution 2
-h5_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv)
+h5_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv)
+h5_conv = BatchNormalization()(h5_conv)
 h5_drop = Dropout(0.5)(h5_conv)
 
 # Some more convolutions
-h6_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h5_drop)
-h7_conv = Convolution2D(192, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_conv)
-h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h7_conv)
+h6_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h5_drop)
+h6_conv = BatchNormalization()(h6_conv)
+h7_conv = Convolution2D(192, 1, 1, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h6_conv)
+h7_conv = BatchNormalization()(h7_conv)
+h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', init='orthogonal', W_regularizer=l2(alpha))(h7_conv)
+h8_conv = BatchNormalization()(h8_conv)
 
 # Now average and softmax
 h9_conv = AveragePooling2D(pool_size=(8, 8))(h8_conv)
