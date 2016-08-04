@@ -20,7 +20,7 @@ data_augmentation = True
 # plot the model?
 plot_model = True
 show_shapes = True
-plot_file = 'cifar10_maxout.png'
+plot_file = 'cifar10_fitnet.png'
 
 # show the summary?
 show_summary = True
@@ -134,7 +134,7 @@ h16_pool = MaxPooling2D(pool_size=(8, 8))(h16_conv)
 h16_drop = Dropout(0.2)(h16_pool)
 
 h16 = Flatten()(h16_drop)
-h17 = MaxoutDense(500, nb_features=5)(h16)
+h17 = MaxoutDense(500, nb_feature=5)(h16)
 h17_drop = Dropout(0.2)(h17)
 out = Dense(10, activation='softmax')(h17)
 
