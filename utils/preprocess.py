@@ -31,7 +31,7 @@ def get_cifar(p, append_test, use_c10):
 		samplewise_std_normalization=True,  # divide each input by its std
 		zca_whitening=False)  # apply ZCA whitening
 
-	datagen.fit(np.concatenate(X_train, X_test))
+	datagen.fit(np.concatenate((X_train, X_test))
 
 	for X_b, y_b in datagen.flow(X_train, y_train, batch_size=X_train.shape[0]):
 		X_train = X_b
