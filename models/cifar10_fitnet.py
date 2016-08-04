@@ -13,6 +13,7 @@ from keras.regularizers import l2
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 import pickle
+import numpy as np
 
 batch_size = 128
 nb_classes = 10
@@ -60,87 +61,87 @@ inputYUV = Input(shape=(3, 32, 32))
 input_drop = Dropout(0.2)(inputYUV)
 
 # This is a single convolutional maxout layer.
-h0_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h0_conv_a'], W_regularizer=l2(0.0005))(inputYUV)
-h0_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h0_conv_b'], W_regularizer=l2(0.0005))(inputYUV)
+h0_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h0_conv_a'], np.zeros(32)), W_regularizer=l2(0.0005))(inputYUV)
+h0_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h0_conv_b'], np.zeros(32)), W_regularizer=l2(0.0005))(inputYUV)
 h0_conv = merge([h0_conv_a, h0_conv_b], mode='max', concat_axis=1)
 
-h1_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h1_conv_a'], W_regularizer=l2(0.0005))(h0_conv)
-h1_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h1_conv_b'], W_regularizer=l2(0.0005))(h0_conv)
+h1_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h1_conv_a'], np.zeros(32)), W_regularizer=l2(0.0005))(h0_conv)
+h1_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h1_conv_b'], np.zeros(32)), W_regularizer=l2(0.0005))(h0_conv)
 h1_conv = merge([h1_conv_a, h1_conv_b], mode='max', concat_axis=1)
 
-h2_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h2_conv_a'], W_regularizer=l2(0.0005))(h1_conv)
-h2_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=weights['h2_conv_b'], W_regularizer=l2(0.0005))(h1_conv)
+h2_conv_a = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h2_conv_a'], np.zeros(32)), W_regularizer=l2(0.0005))(h1_conv)
+h2_conv_b = Convolution2D(32, 3, 3, border_mode='same', weights=(weights['h2_conv_b'], np.zeros(32)), W_regularizer=l2(0.0005))(h1_conv)
 h2_conv = merge([h2_conv_a, h2_conv_b], mode='max', concat_axis=1)
 
-h3_conv_a = Convolution2D(48, 3, 3, border_mode='same', weights=weights['h3_conv_a'], W_regularizer=l2(0.0005))(h2_conv)
-h3_conv_b = Convolution2D(48, 3, 3, border_mode='same', weights=weights['h3_conv_b'], W_regularizer=l2(0.0005))(h2_conv)
+h3_conv_a = Convolution2D(48, 3, 3, border_mode='same', weights=(weights['h3_conv_a'], np.zeros(48)), W_regularizer=l2(0.0005))(h2_conv)
+h3_conv_b = Convolution2D(48, 3, 3, border_mode='same', weights=(weights['h3_conv_b'], np.zeros(48)), W_regularizer=l2(0.0005))(h2_conv)
 h3_conv = merge([h3_conv_a, h3_conv_b], mode='max', concat_axis=1)
 
-h4_conv_a = Convolution2D(48, 3, 3, border_mode='same', weights=weights['h4_conv_a'], W_regularizer=l2(0.0005))(h3_conv)
-h4_conv_b = Convolution2D(48, 3, 3, border_mode='same', weights=weights['h4_conv_b'], W_regularizer=l2(0.0005))(h3_conv)
+h4_conv_a = Convolution2D(48, 3, 3, border_mode='same', weights=(weights['h4_conv_a'], np.zeros(48)), W_regularizer=l2(0.0005))(h3_conv)
+h4_conv_b = Convolution2D(48, 3, 3, border_mode='same', weights=(weights['h4_conv_b'], np.zeros(48)), W_regularizer=l2(0.0005))(h3_conv)
 h4_conv = merge([h4_conv_a, h4_conv_b], mode='max', concat_axis=1)
 
 h4_pool = MaxPooling2D(pool_size=(2, 2))(h4_conv)
 h4_drop = Dropout(0.2)(h4_pool)
 
-h5_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h5_conv_a'], W_regularizer=l2(0.0005))(h4_drop)
-h5_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h5_conv_b'], W_regularizer=l2(0.0005))(h4_drop)
+h5_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h5_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h4_drop)
+h5_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h5_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h4_drop)
 h5_conv = merge([h5_conv_a, h5_conv_b], mode='max', concat_axis=1)
 
-h6_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h6_conv_a'], W_regularizer=l2(0.0005))(h5_conv)
-h6_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h6_conv_b'], W_regularizer=l2(0.0005))(h5_conv)
+h6_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h6_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h5_conv)
+h6_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h6_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h5_conv)
 h6_conv = merge([h6_conv_a, h6_conv_b], mode='max', concat_axis=1)
 
-h7_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h7_conv_a'], W_regularizer=l2(0.0005))(h6_conv)
-h7_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h7_conv_b'], W_regularizer=l2(0.0005))(h6_conv)
+h7_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h7_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h6_conv)
+h7_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h7_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h6_conv)
 h7_conv = merge([h7_conv_a, h7_conv_b], mode='max', concat_axis=1)
 
-h8_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h8_conv_a'], W_regularizer=l2(0.0005))(h7_conv)
-h8_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h8_conv_b'], W_regularizer=l2(0.0005))(h7_conv)
+h8_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h8_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h7_conv)
+h8_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h8_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h7_conv)
 h8_conv = merge([h8_conv_a, h8_conv_b], mode='max', concat_axis=1)
 
-h9_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h9_conv_a'], W_regularizer=l2(0.0005))(h8_conv)
-h9_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h9_conv_b'], W_regularizer=l2(0.0005))(h8_conv)
+h9_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h9_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h8_conv)
+h9_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h9_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h8_conv)
 h9_conv = merge([h9_conv_a, h9_conv_b], mode='max', concat_axis=1)
 
-h10_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h10_conv_a'], W_regularizer=l2(0.0005))(h9_conv)
-h10_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=weights['h10_conv_b'], W_regularizer=l2(0.0005))(h9_conv)
+h10_conv_a = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h10_conv_a'], np.zeros(80)), W_regularizer=l2(0.0005))(h9_conv)
+h10_conv_b = Convolution2D(80, 3, 3, border_mode='same', weights=(weights['h10_conv_b'], np.zeros(80)), W_regularizer=l2(0.0005))(h9_conv)
 h10_conv = merge([h10_conv_a, h10_conv_b], mode='max', concat_axis=1)
 
 h10_pool = MaxPooling2D(pool_size=(2, 2))(h10_conv)
 h10_drop = Dropout(0.2)(h10_pool)
 
-h11_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h11_conv_a'], W_regularizer=l2(0.0005))(h10_drop)
-h11_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h11_conv_b'], W_regularizer=l2(0.0005))(h10_drop)
+h11_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h11_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h10_drop)
+h11_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h11_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h10_drop)
 h11_conv = merge([h11_conv_a, h11_conv_b], mode='max', concat_axis=1)
 
-h12_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h12_conv_a'], W_regularizer=l2(0.0005))(h11_conv)
-h12_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h12_conv_b'], W_regularizer=l2(0.0005))(h11_conv)
+h12_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h12_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h11_conv)
+h12_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h12_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h11_conv)
 h12_conv = merge([h12_conv_a, h12_conv_b], mode='max', concat_axis=1)
 
-h13_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h13_conv_a'], W_regularizer=l2(0.0005))(h12_conv)
-h13_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h13_conv_b'], W_regularizer=l2(0.0005))(h12_conv)
+h13_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h13_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h12_conv)
+h13_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h13_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h12_conv)
 h13_conv = merge([h13_conv_a, h13_conv_b], mode='max', concat_axis=1)
 
-h14_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h14_conv_a'], W_regularizer=l2(0.0005))(h13_conv)
-h14_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h14_conv_b'], W_regularizer=l2(0.0005))(h13_conv)
+h14_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h14_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h13_conv)
+h14_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h14_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h13_conv)
 h14_conv = merge([h14_conv_a, h14_conv_b], mode='max', concat_axis=1)
 
-h15_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h15_conv_a'], W_regularizer=l2(0.0005))(h14_conv)
-h15_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h15_conv_b'], W_regularizer=l2(0.0005))(h14_conv)
+h15_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h15_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h14_conv)
+h15_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h15_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h14_conv)
 h15_conv = merge([h15_conv_a, h15_conv_b], mode='max', concat_axis=1)
 
-h16_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h16_conv_a'], W_regularizer=l2(0.0005))(h15_conv)
-h16_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=weights['h16_conv_b'], W_regularizer=l2(0.0005))(h15_conv)
+h16_conv_a = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h16_conv_a'], np.zeros(128)), W_regularizer=l2(0.0005))(h15_conv)
+h16_conv_b = Convolution2D(128, 3, 3, border_mode='same', weights=(weights['h16_conv_b'], np.zeros(128)), W_regularizer=l2(0.0005))(h15_conv)
 h16_conv = merge([h16_conv_a, h16_conv_b], mode='max', concat_axis=1)
 
 h16_pool = MaxPooling2D(pool_size=(8, 8))(h16_conv)
 h16_drop = Dropout(0.2)(h16_pool)
 
 h16 = Flatten()(h16_drop)
-h17 = MaxoutDense(500, nb_feature=5, weights=weights['h17'], W_regularizer=l2(0.0005))(h16)
+h17 = MaxoutDense(500, nb_feature=5, weights=(weights['h17'], np.zeros(500)), W_regularizer=l2(0.0005))(h16)
 h17_drop = Dropout(0.2)(h17)
-out = Dense(10, activation='softmax', weights=weights['h18'], W_regularizer=l2(0.0005))(h17)
+out = Dense(10, activation='softmax', weights=(weights['h18'], np.zeros(10)), W_regularizer=l2(0.0005))(h17)
 
 model = Model(input=inputYUV, output=out)
 
