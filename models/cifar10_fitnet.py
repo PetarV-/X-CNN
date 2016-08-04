@@ -37,23 +37,6 @@ print(X_test.shape[0], 'test samples')
 X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
 
-datagen = ImageDataGenerator(
-        samplewise_center=True,  # set each sample mean to 0
-        samplewise_std_normalization=True,  # divide each input by its std
-        zca_whitening=True)  # apply ZCA whitening
-
-datagen.fit(X_train)
-
-for X_b, Y_b in datagen.flow(X_train, Y_train, batch_size=X_train.shape[0]):
-    X_train = X_b
-    Y_train = Y_b
-    break
-
-for X_b, Y_b in datagen.flow(X_test, Y_test, batch_size=X_test.shape[0]):
-    X_test = X_b
-    Y_test = Y_b
-    break
-
 weights = pickle.load(open('weights.pkl', 'rb'))
 
 inputYUV = Input(shape=(3, 32, 32))

@@ -36,8 +36,6 @@ print(X_test.shape[0], 'test samples')
 
 X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
-X_train /= 255
-X_test /= 255
 
 inputYUV = Input(shape=(3, 32, 32))
 

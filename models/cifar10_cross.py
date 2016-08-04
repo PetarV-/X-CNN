@@ -30,8 +30,6 @@ print(X_test.shape[0], 'test samples')
 
 X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
-X_train /= 255
-X_test /= 255
 
 #cross-connections between two conv layers, Y is the middle layer, while U and V are side layers.
 
