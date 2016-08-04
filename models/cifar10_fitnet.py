@@ -41,12 +41,12 @@ datagen = ImageDataGenerator(
 
 datagen.fit(X_train)
 
-for X_b, Y_b in datagen.flow(X_train, Y_train):
+for X_b, Y_b in datagen.flow(X_train, Y_train, batch_size=X_train.shape[0]):
     X_train = X_b
     Y_train = Y_b
     break
 
-for X_b, Y_b in datagen.flow(X_test, Y_test):
+for X_b, Y_b in datagen.flow(X_test, Y_test, batch_size=X_test.shape[0]):
     X_test = X_b
     Y_test = Y_b
     break
