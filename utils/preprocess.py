@@ -1,5 +1,6 @@
 from __future__ import print_function
 from keras.datasets import cifar10, cifar100
+from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import np_utils
 import numpy as np
 import PIL.Image as im
