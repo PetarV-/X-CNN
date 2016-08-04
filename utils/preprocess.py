@@ -24,10 +24,6 @@ def get_cifar(p, append_test, use_c10):
 		yuv = img.convert('YCbCr')
 		X_test[i]=np.transpose(np.array(yuv))
 
-	# convert class vectors to binary class matrices
-	Y_train = np_utils.to_categorical(y_train, num_classes)
-	Y_test = np_utils.to_categorical(y_test, num_classes)
-
 	# Prepare GCN (and potentially ZCA)
 	datagen = ImageDataGenerator(
 		samplewise_center=True,  # set each sample mean to 0
@@ -70,5 +66,9 @@ def get_cifar(p, append_test, use_c10):
 	# Remove the computed indices
 	X_train = np.delete(X_train, rem, 0)
 	y_train = np.delete(y_train, rem, 0)
+
+	# convert class vectors to binary class matrices
+	Y_train = np_utils.to_categorical(y_train, num_classes)
+	Y_test = np_utils.to_categorical(y_test, num_classes)
 
 	return (X_train, Y_train), (X_test, Y_test)
