@@ -69,18 +69,22 @@ h2_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init=
 h2_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_U)
 h2_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_V)
 
+h2_conv_Y = BatchNormalization(axis=1)(h2_conv_Y)
+h2_conv_U = BatchNormalization(axis=1)(h2_conv_U)
+h2_conv_V = BatchNormalization(axis=1)(h2_conv_V)
+
 # Interlayer connections Y <-> U, Y <-> V
 Y_to_UV = Convolution2D(48, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_conv_Y)
 U_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_conv_U)
 V_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_conv_V)
 
+Y_to_UV = BatchNormalization(axis=1)(Y_to_UV)
+U_to_Y = BatchNormalization(axis=1)(U_to_Y)
+V_to_Y = BatchNormalization(axis=1)(V_to_Y)
+
 h2_Y = merge([h2_conv_Y, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
 h2_U = merge([h2_conv_U, Y_to_UV], mode='concat', concat_axis=1)
 h2_V = merge([h2_conv_V, Y_to_UV], mode='concat', concat_axis=1)
-
-h2_Y = BatchNormalization(axis=1)(h2_Y)
-h2_U = BatchNormalization(axis=1)(h2_U)
-h2_V = BatchNormalization(axis=1)(h2_V)
 
 h2_drop_Y = Dropout(0.5)(h2_Y)
 h2_drop_U = Dropout(0.5)(h2_U)
@@ -107,18 +111,22 @@ h5_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init=
 h5_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_U)
 h5_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_V)
 
+h5_conv_Y = BatchNormalization(axis=1)(h5_conv_Y)
+h5_conv_U = BatchNormalization(axis=1)(h5_conv_U)
+h5_conv_V = BatchNormalization(axis=1)(h5_conv_V)
+
 # Interlayer connections Y <-> U, Y <-> V
 Y_to_UV = Convolution2D(96, 1, 1, border_mode='same', init='he_uniform', activation='relu')(h5_conv_Y)
 U_to_Y = Convolution2D(48, 1, 1, border_mode='same', init='he_uniform', activation='relu')(h5_conv_U)
 V_to_Y = Convolution2D(48, 1, 1, border_mode='same', init='he_uniform', activation='relu')(h5_conv_V)
 
+Y_to_UV = BatchNormalization(axis=1)(Y_to_UV)
+U_to_Y = BatchNormalization(axis=1)(U_to_Y)
+V_to_Y = BatchNormalization(axis=1)(V_to_Y)
+
 h5_Y = merge([h5_conv_Y, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
 h5_U = merge([h5_conv_U, Y_to_UV], mode='concat', concat_axis=1)
 h5_V = merge([h5_conv_V, Y_to_UV], mode='concat', concat_axis=1)
-
-h5_Y = BatchNormalization(axis=1)(h5_Y)
-h5_U = BatchNormalization(axis=1)(h5_U)
-h5_V = BatchNormalization(axis=1)(h5_V)
 
 h5_drop_Y = Dropout(0.5)(h5_Y)
 h5_drop_U = Dropout(0.5)(h5_U)
@@ -137,9 +145,12 @@ h7_conv_Y = Convolution2D(96, 1, 1, border_mode='same', activation='relu', init=
 h7_conv_U = Convolution2D(48, 1, 1, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h6_conv_U)
 h7_conv_V = Convolution2D(48, 1, 1, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h6_conv_V)
 
+h7_conv_Y = BatchNormalization(axis=1)(h7_conv_Y)
+h7_conv_U = BatchNormalization(axis=1)(h7_conv_U)
+h7_conv_V = BatchNormalization(axis=1)(h7_conv_V)
+
 # Time to merge and reduce!
 h7_conv = merge([h7_conv_Y, h7_conv_U, h7_conv_V], mode='concat', concat_axis=1)
-h7_conv = BatchNormalization(axis=1)(h7_conv)
 h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h7_conv)
 h8_conv = BatchNormalization(axis=1)(h8_conv)
 
