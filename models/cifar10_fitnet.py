@@ -139,7 +139,7 @@ h16_pool = MaxPooling2D(pool_size=(8, 8))(h16_conv)
 h16_drop = Dropout(0.2)(h16_pool)
 
 h16 = Flatten()(h16_drop)
-h17 = MaxoutDense(500, nb_feature=5, weights=(weights['h17'], np.zeros(500)), W_regularizer=l2(0.0005))(h16)
+h17 = MaxoutDense(500, nb_feature=5, weights=(weights['h17'], np.zeros((5, 500))), W_regularizer=l2(0.0005))(h16)
 h17_drop = Dropout(0.2)(h17)
 out = Dense(10, activation='softmax', weights=(weights['h18'], np.zeros(10)), W_regularizer=l2(0.0005))(h17)
 
