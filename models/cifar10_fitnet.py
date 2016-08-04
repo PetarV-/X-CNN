@@ -17,7 +17,7 @@ import numpy as np
 
 batch_size = 128
 nb_classes = 10
-nb_epoch = 474
+nb_epoch = 230
 data_augmentation = True
 
 # plot the model?
