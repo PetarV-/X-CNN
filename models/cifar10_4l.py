@@ -97,7 +97,7 @@ out=Dense(nb_classes, activation='softmax')(fc)
 model = Model(input=inputYUV, output=out)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=Adam(lr=0.0001),
+              optimizer='adam',
               metrics=['accuracy'])
 
 if show_summary:

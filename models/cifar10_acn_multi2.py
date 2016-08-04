@@ -49,53 +49,53 @@ inputY_drop = Dropout(0.2)(inputY)
 inputU_drop = Dropout(0.2)(inputU)
 inputV_drop = Dropout(0.2)(inputV)
 
-h0_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(inputY_drop)
-h0_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(inputU_drop)
-h0_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(inputV_drop)
+h0_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(inputY_drop)
+h0_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(inputU_drop)
+h0_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(inputV_drop)
 
-h1_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv_Y)
-h1_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv_U)
-h1_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h0_conv_V)
+h1_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h0_conv_Y)
+h1_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h0_conv_U)
+h1_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h0_conv_V)
 
 # "Pooling" convolutions 1
-h2_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_Y)
-h2_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_U)
-h2_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_V)
+h2_conv_Y = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_Y)
+h2_conv_U = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_U)
+h2_conv_V = Convolution2D(24, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h1_conv_V)
 
 h2_drop_Y = Dropout(0.5)(h2_conv_Y)
 h2_drop_U = Dropout(0.5)(h2_conv_U)
 h2_drop_V = Dropout(0.5)(h2_conv_V)
 
 # Interlayer connections Y <-> U, Y <-> V
-Y_to_UV = Convolution2D(48, 1, 1, border_mode='same', activation='relu')(h2_drop_Y)
-U_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu')(h2_drop_U)
-V_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu')(h2_drop_V)
+Y_to_UV = Convolution2D(48, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_drop_Y)
+U_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_drop_U)
+V_to_Y = Convolution2D(24, 1, 1, border_mode='same', activation='relu', init='he_uniform')(h2_drop_V)
 
 h2_Y = merge([h2_drop_Y, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
 h2_U = merge([h2_drop_U, Y_to_UV], mode='concat', concat_axis=1)
 h2_V = merge([h2_drop_V, Y_to_UV], mode='concat', concat_axis=1)
 
-h3_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h2_Y)
-h3_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h2_U)
-h3_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h2_V)
+h3_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h2_Y)
+h3_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h2_U)
+h3_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h2_V)
 
-h4_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h3_conv_Y)
-h4_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h3_conv_U)
-h4_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h3_conv_V)
+h4_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h3_conv_Y)
+h4_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h3_conv_U)
+h4_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h3_conv_V)
 
 # "Pooling" convolution 2
-h5_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_Y)
-h5_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_U)
-h5_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_V)
+h5_conv_Y = Convolution2D(96, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_Y)
+h5_conv_U = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_U)
+h5_conv_V = Convolution2D(48, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha), subsample=(2, 2))(h4_conv_V)
 
 # In this version, interlayer connections end here (equivalent to 4L)
 h5_conv = merge([h5_conv_Y, h5_conv_U, h5_conv_V], mode='concat', concat_axis=1)
 h5_drop = Dropout(0.5)(h5_conv)
 
 # Some more convolutions
-h6_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h5_drop)
-h7_conv = Convolution2D(192, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h6_conv)
-h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', W_regularizer=l2(alpha))(h7_conv)
+h6_conv = Convolution2D(192, 3, 3, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h5_drop)
+h7_conv = Convolution2D(192, 1, 1, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h6_conv)
+h8_conv = Convolution2D(nb_classes, 1, 1, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(h7_conv)
 
 # Now average and softmax
 h9_conv = AveragePooling2D(pool_size=(8, 8))(h8_conv)
@@ -105,7 +105,7 @@ out = Activation('softmax')(h9_flat)
 model = Model(input=inputYUV, output=out)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=Adam(lr=0.0001),
+              optimizer='adam',
               metrics=['accuracy'])
 
 if show_summary:

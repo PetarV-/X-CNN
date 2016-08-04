@@ -80,7 +80,7 @@ y = Activation('softmax')(out)
 model = Model(input=inputYUV, output=y)
 
 model.compile(loss='categorical_crossentropy',
-              optimizer=Adam(lr=0.0001),
+              optimizer='adam',
               metrics=['accuracy'])
 
 if show_summary:
