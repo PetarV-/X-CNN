@@ -12,7 +12,7 @@ import numpy as np
 
 batch_size = 32
 nb_classes = 10
-nb_epoch = 300
+nb_epoch = 200
 train_ratio=0.2
 data_augmentation = True
 
