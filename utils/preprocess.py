@@ -14,35 +14,6 @@ def get_cifar(p, append_test, use_c10):
 	num_samples = X_train.shape[0]
 	num_classes = 10 if use_c10 else 100
 
-	# convert from RBG to YUV
-	for i in range(X_train.shape[0]):
-		img = im.fromarray(np.transpose(X_train[i]))
-		yuv=img.convert('YCbCr')
-		X_train[i]=np.transpose(np.array(yuv))
-
-	for i in range(X_test.shape[0]):
-		img = im.fromarray(np.transpose(X_test[i]))
-		yuv = img.convert('YCbCr')
-		X_test[i]=np.transpose(np.array(yuv))
-
-	# Prepare GCN (and potentially ZCA)
-	datagen = ImageDataGenerator(
-		samplewise_center=True,  # set each sample mean to 0
-		samplewise_std_normalization=True,  # divide each input by its std
-		zca_whitening=False)  # apply ZCA whitening
-
-	datagen.fit(np.concatenate((X_train, X_test)))
-
-	for X_b, y_b in datagen.flow(X_train, y_train, batch_size=X_train.shape[0]):
-		X_train = X_b
-		y_train = y_b
-		break
-
-	for X_b, y_b in datagen.flow(X_test, y_test, batch_size=X_test.shape[0]):
-		X_test = X_b
-		y_test = y_b
-		break
-
 	# Compute how much to retain per class
 	cnts = np.full(num_classes, (num_samples // num_classes) * p)
 
@@ -67,6 +38,17 @@ def get_cifar(p, append_test, use_c10):
 	# Remove the computed indices
 	X_train = np.delete(X_train, rem, 0)
 	y_train = np.delete(y_train, rem, 0)
+
+	# convert from RBG to YUV
+	for i in range(X_train.shape[0]):
+		img = im.fromarray(np.transpose(X_train[i]))
+		yuv=img.convert('YCbCr')
+		X_train[i]=np.transpose(np.array(yuv))
+
+	for i in range(X_test.shape[0]):
+		img = im.fromarray(np.transpose(X_test[i]))
+		yuv = img.convert('YCbCr')
+		X_test[i]=np.transpose(np.array(yuv))
 
 	# convert class vectors to binary class matrices
 	Y_train = np_utils.to_categorical(y_train, num_classes)

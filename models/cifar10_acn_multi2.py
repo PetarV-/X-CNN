@@ -37,12 +37,13 @@ X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
 
 inputYUV = Input(shape=(3, 32, 32))
+inputNorm = BatchNormalization(axis=1)(inputYUV)
 
 # To simplify the data augmentation, I delay slicing until this point.
 # Not sure if there is a better way to handle it. ---Petar
-inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
+inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputNorm)
+inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputNorm)
+inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputNorm)
 
 inputY_drop = Dropout(0.2)(inputY)
 inputU_drop = Dropout(0.2)(inputU)

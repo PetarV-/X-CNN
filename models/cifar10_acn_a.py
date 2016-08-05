@@ -38,8 +38,9 @@ X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
 
 inputYUV = Input(shape=(3, 32, 32))
+inputNorm = BatchNormalization(axis=1)(inputYUV)
 
-input_drop = Dropout(0.2)(inputYUV)
+input_drop = Dropout(0.2)(inputNorm)
 
 h0_conv = Convolution2D(96, 5, 5, border_mode='same', activation='relu', init='he_uniform', W_regularizer=l2(alpha))(input_drop)
 h0_conv = BatchNormalization(axis=1)(h0_conv)

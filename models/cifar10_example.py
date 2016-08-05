@@ -13,6 +13,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
+from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
@@ -41,8 +42,8 @@ X_test = X_test.astype('float32')
 
 model = Sequential()
 
-model.add(Convolution2D(64, 3, 3, border_mode='same',
-                        input_shape=(3, 32, 32)))
+model.add(BatchNormalization(axis=1, input_shape=(3, 32, 32)))
+model.add(Convolution2D(64, 3, 3, border_mode='same'))
 model.add(Activation('relu'))
 model.add(Convolution2D(64, 3, 3, border_mode='same'))
 model.add(Activation('relu'))

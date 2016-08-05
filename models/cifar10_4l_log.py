@@ -4,6 +4,7 @@ from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
+from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
@@ -36,12 +37,13 @@ X_test = X_test.astype('float32')
 #cross-connections between two conv layers, Y is the middle layer, while U and V are side layers.
 
 inputYUV = Input(shape=(3, 32, 32))
+inputNorm = BatchNormalization(axis=1)(inputYUV)
 
 # To simplify the data augmentation, I delay slicing until this point.
 # Not sure if there is a better way to handle it. ---Petar
-inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputYUV)
-inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputYUV)
+inputY = Lambda(lambda x: x[:,0:1,:,:], output_shape=(1, 32, 32))(inputNorm)
+inputU = Lambda(lambda x: x[:,1:2,:,:], output_shape=(1, 32, 32))(inputNorm)
+inputV = Lambda(lambda x: x[:,2:3,:,:], output_shape=(1, 32, 32))(inputNorm)
 
 convY = Convolution2D(32, 3, 3, border_mode='same', activation='relu')(inputY)
 convU = Convolution2D(16, 3, 3, border_mode='same', activation='relu')(inputU)

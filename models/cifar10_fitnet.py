@@ -39,8 +39,9 @@ X_train = X_train.astype('float32')
 X_test = X_test.astype('float32')
 
 inputYUV = Input(shape=(3, 32, 32))
+inputNorm = BatchNormalization(axis=1)(inputYUV)
 
-input_drop = Dropout(0.2)(inputYUV)
+input_drop = Dropout(0.2)(inputNorm)
 
 # This is a single convolutional maxout layer.
 h0_conv_a = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputYUV)
