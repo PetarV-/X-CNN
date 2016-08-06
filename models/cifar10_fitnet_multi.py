@@ -5,7 +5,7 @@ This will implement the multilayer variant of the FitNet4 network
 from __future__ import print_function
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Model
-from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, MaxoutDense
+from keras.layers import Input, Dense, Activation, Flatten, Dropout, merge, MaxoutDense, Lambda
 from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
@@ -339,7 +339,7 @@ h15_conv_U = BatchNormalization(axis=1)(h15_conv_U)
 
 h15_conv_V_a = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(h14_conv_V)
 h15_conv_V_b = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(h14_conv_V)
-h15_conv_V = merge([h16_conv_V_a, h15_conv_V_b], mode='max', concat_axis=1)
+h15_conv_V = merge([h15_conv_V_a, h15_conv_V_b], mode='max', concat_axis=1)
 h15_conv_V = BatchNormalization(axis=1)(h15_conv_V)
 
 h16_conv_Y_a = Convolution2D(64, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(h15_conv_Y)
