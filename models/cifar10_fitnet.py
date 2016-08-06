@@ -13,8 +13,6 @@ from keras.optimizers import Adam
 from keras.regularizers import l2
 from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
-import pickle
-import numpy as np
 
 batch_size = 128
 nb_classes = 10
