@@ -20,7 +20,7 @@ sys.setrecursionlimit(50000)
 batch_size = 128
 nb_classes = 10
 nb_epoch = 230
-data_augmentation = True
+data_augmentation = False
 
 # plot the model?
 plot_model = True
@@ -31,7 +31,7 @@ plot_file = 'cifar10_fitnet_multi.png'
 show_summary = True
 
 # the data, shuffled and split between train and test sets
-(X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
+(X_train, Y_train), (X_test, Y_test) = get_cifar(p=0.05, append_test=False, use_c10=True)
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
@@ -133,25 +133,41 @@ poolY = Dropout(0.2)(poolY)
 poolU = Dropout(0.2)(poolU)
 poolV = Dropout(0.2)(poolV)
 
+# Inline connections
+Y_to_Y_a = Convolution2D(24, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_Y_b = Convolution2D(24, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_Y = merge([Y_to_Y_a, Y_to_Y_b], mode='max', concat_axis=1)
+Y_to_Y = BatchNormalization(axis=1)(Y_to_Y)
+
+U_to_U_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_U_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_U = merge([U_to_U_a, U_to_U_b], mode='max', concat_axis=1)
+U_to_U = BatchNormalization(axis=1)(U_to_U)
+
+V_to_V_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_V_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_V = merge([V_to_V_a, V_to_V_b], mode='max', concat_axis=1)
+V_to_V = BatchNormalization(axis=1)(Y_to_Y)
+
 # Cross connections: Y <-> U, Y <-> V
-Y_to_UV_a = Convolution2D(24, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
-Y_to_UV_b = Convolution2D(24, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_UV_a = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_UV_b = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
 Y_to_UV = merge([Y_to_UV_a, Y_to_UV_b], mode='max', concat_axis=1)
 Y_to_UV = BatchNormalization(axis=1)(Y_to_UV)
 
-U_to_Y_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
-U_to_Y_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_Y_a = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_Y_b = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
 U_to_Y = merge([U_to_Y_a, U_to_Y_b], mode='max', concat_axis=1)
 U_to_Y = BatchNormalization(axis=1)(U_to_Y)
 
-V_to_Y_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
-V_to_Y_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_Y_a = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_Y_b = Convolution2D(8, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_Y = merge([V_to_Y_a, V_to_Y_b], mode='max', concat_axis=1)
 V_to_Y = BatchNormalization(axis=1)(V_to_Y)
 
-Ymap = merge([poolY, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
-Umap = merge([poolU, Y_to_UV], mode='concat', concat_axis=1)
-Vmap = merge([poolV, Y_to_UV], mode='concat', concat_axis=1)
+Ymap = merge([Y_to_Y, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
+Umap = merge([U_to_U, Y_to_UV], mode='concat', concat_axis=1)
+Vmap = merge([V_to_V, Y_to_UV], mode='concat', concat_axis=1)
 
 h5_conv_Y_a = Convolution2D(40, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(Ymap)
 h5_conv_Y_b = Convolution2D(40, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(Ymap)
@@ -251,25 +267,41 @@ poolY = Dropout(0.2)(poolY)
 poolU = Dropout(0.2)(poolU)
 poolV = Dropout(0.2)(poolV)
 
+# Inline connections
+Y_to_Y_a = Convolution2D(40, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_Y_b = Convolution2D(40, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_Y = merge([Y_to_Y_a, Y_to_Y_b], mode='max', concat_axis=1)
+Y_to_Y = BatchNormalization(axis=1)(Y_to_Y)
+
+U_to_U_a = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_U_b = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_U = merge([U_to_U_a, U_to_U_b], mode='max', concat_axis=1)
+U_to_U = BatchNormalization(axis=1)(U_to_U)
+
+V_to_V_a = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_V_b = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_V = merge([V_to_V_a, V_to_V_b], mode='max', concat_axis=1)
+V_to_V = BatchNormalization(axis=1)(Y_to_Y)
+
 # Cross connections: Y <-> U, Y <-> V
-Y_to_UV_a = Convolution2D(40, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
-Y_to_UV_b = Convolution2D(40, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_UV_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
+Y_to_UV_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
 Y_to_UV = merge([Y_to_UV_a, Y_to_UV_b], mode='max', concat_axis=1)
 Y_to_UV = BatchNormalization(axis=1)(Y_to_UV)
 
-U_to_Y_a = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
-U_to_Y_b = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_Y_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
+U_to_Y_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolU)
 U_to_Y = merge([U_to_Y_a, U_to_Y_b], mode='max', concat_axis=1)
 U_to_Y = BatchNormalization(axis=1)(U_to_Y)
 
-V_to_Y_a = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
-V_to_Y_b = Convolution2D(20, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_Y_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
+V_to_Y_b = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_Y = merge([V_to_Y_a, V_to_Y_b], mode='max', concat_axis=1)
 V_to_Y = BatchNormalization(axis=1)(V_to_Y)
 
-Ymap = merge([poolY, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
-Umap = merge([poolU, Y_to_UV], mode='concat', concat_axis=1)
-Vmap = merge([poolV, Y_to_UV], mode='concat', concat_axis=1)
+Ymap = merge([Y_to_Y, U_to_Y, V_to_Y], mode='concat', concat_axis=1)
+Umap = merge([U_to_U, Y_to_UV], mode='concat', concat_axis=1)
+Vmap = merge([V_to_V, Y_to_UV], mode='concat', concat_axis=1)
 
 h11_conv_Y_a = Convolution2D(64, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(Ymap)
 h11_conv_Y_b = Convolution2D(64, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(Ymap)
@@ -396,7 +428,7 @@ if not data_augmentation:
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
               shuffle=True,
-              verbose=2)
+              verbose=1)
 else:
     print('Using real-time data augmentation.')
 
