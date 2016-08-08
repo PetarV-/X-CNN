@@ -20,7 +20,7 @@ sys.setrecursionlimit(50000)
 batch_size = 128
 nb_classes = 10
 nb_epoch = 230
-data_augmentation = False
+data_augmentation = True
 
 # plot the model?
 plot_model = True
@@ -31,7 +31,7 @@ plot_file = 'cifar10_fitnet_multi.png'
 show_summary = True
 
 # the data, shuffled and split between train and test sets
-(X_train, Y_train), (X_test, Y_test) = get_cifar(p=0.05, append_test=False, use_c10=True)
+(X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
 print('X_train shape:', X_train.shape)
 print(X_train.shape[0], 'train samples')
 print(X_test.shape[0], 'test samples')
@@ -428,7 +428,7 @@ if not data_augmentation:
               nb_epoch=nb_epoch,
               validation_data=(X_test, Y_test),
               shuffle=True,
-              verbose=1)
+              verbose=2)
 else:
     print('Using real-time data augmentation.')
 
