@@ -144,7 +144,7 @@ h16 = Flatten()(h16_drop)
 h17 = MaxoutDense(500, nb_feature=5, init='glorot_uniform', W_regularizer=l2(0.0005))(h16)
 h17 = BatchNormalization(axis=1)(h17)
 h17_drop = Dropout(0.2)(h17)
-out = Dense(10, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17)
+out = Dense(nb_classes, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17)
 
 model = Model(input=inputYUV, output=out)
 
