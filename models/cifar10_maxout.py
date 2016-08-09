@@ -28,6 +28,10 @@ plot_file = 'cifar10_maxout.png'
 # show the summary?
 show_summary = True
 
+# save the weights after training?
+save_weights = True
+weights_file = 'cifar10_maxout.h5'
+
 # the data, shuffled and split between train and test sets
 (X_train, Y_train), (X_test, Y_test) = get_cifar(p=1.0, append_test=False, use_c10=True)
 print('X_train shape:', X_train.shape)
@@ -124,3 +128,6 @@ else:
                         nb_epoch=nb_epoch,
                         validation_data=(X_test, Y_test),
                         verbose=2)
+
+if save_weights:
+    model.save_weights(weights_file)
