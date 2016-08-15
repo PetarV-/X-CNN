@@ -1,2 +1,2 @@
-# Multi-CNN
-Multilayer convolutional neural networks
+# X-CNN
+Cross-modal convolutional neural networks
