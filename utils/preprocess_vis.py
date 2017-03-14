@@ -42,12 +42,12 @@ def get_cifar(p, append_test, use_c10):
 
 	# convert from RBG to YUV
 	for i in range(X_train.shape[0]):
-		img = im.fromarray(X_train[i])
+		img = im.fromarray(np.transpose(X_train[i]))
 		yuv=img.convert('YCbCr')
 		X_train[i]=np.transpose(np.array(yuv))
 
 	for i in range(X_test.shape[0]):
-		img = im.fromarray(X_test[i])
+		img = im.fromarray(np.transpose(X_test[i]))
 		yuv = img.convert('YCbCr')
 		X_test[i]=np.transpose(np.array(yuv))
 
