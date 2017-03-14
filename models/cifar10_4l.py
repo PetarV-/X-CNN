@@ -6,18 +6,12 @@ from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D, merge, Input, Lambda
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
-from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
 batch_size = 32
 nb_classes = 10
 nb_epoch = 200
 data_augmentation = True
-
-# plot the model?
-plot_model = True
-show_shapes = True
-plot_file = 'cifar10_4l.png'
 
 # show the summary?
 show_summary = True
@@ -106,9 +100,6 @@ model.compile(loss='categorical_crossentropy',
 
 if show_summary:
     print(model.summary())
-
-if plot_model:
-    plot(model, show_shapes=show_shapes, to_file=plot_file)
 
 if not data_augmentation:
     print('Not using data augmentation.')

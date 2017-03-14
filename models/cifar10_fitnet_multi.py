@@ -10,7 +10,6 @@ from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.regularizers import l2
-from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 import sys
 
@@ -21,11 +20,6 @@ batch_size = 128
 nb_classes = 10
 nb_epoch = 230
 data_augmentation = True
-
-# plot the model?
-plot_model = True
-show_shapes = True
-plot_file = 'cifar10_fitnet_multi.png'
 
 # show the summary?
 show_summary = True
@@ -54,18 +48,18 @@ inputY_drop = Dropout(0.2)(inputY)
 inputU_drop = Dropout(0.2)(inputU)
 inputV_drop = Dropout(0.2)(inputV)
 
-h0_conv_Y_a = Convolution2D(24, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputY)
-h0_conv_Y_b = Convolution2D(24, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputY)
+h0_conv_Y_a = Convolution2D(24, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputY_drop)
+h0_conv_Y_b = Convolution2D(24, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputY_drop)
 h0_conv_Y = merge([h0_conv_Y_a, h0_conv_Y_b], mode='max', concat_axis=1)
 h0_conv_Y = BatchNormalization(axis=1)(h0_conv_Y)
 
-h0_conv_U_a = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputU)
-h0_conv_U_b = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputU)
+h0_conv_U_a = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputU_drop)
+h0_conv_U_b = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputU_drop)
 h0_conv_U = merge([h0_conv_U_a, h0_conv_U_b], mode='max', concat_axis=1)
 h0_conv_U = BatchNormalization(axis=1)(h0_conv_U)
 
-h0_conv_V_a = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputV)
-h0_conv_V_b = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputV)
+h0_conv_V_a = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputV_drop)
+h0_conv_V_b = Convolution2D(12, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputV_drop)
 h0_conv_V = merge([h0_conv_V_a, h0_conv_V_b], mode='max', concat_axis=1)
 h0_conv_V = BatchNormalization(axis=1)(h0_conv_V)
 
@@ -411,7 +405,7 @@ h16 = Flatten()(concat_map)
 h17 = MaxoutDense(500, nb_feature=5, init='glorot_uniform', W_regularizer=l2(0.0005))(h16)
 h17 = BatchNormalization(axis=1)(h17)
 h17_drop = Dropout(0.2)(h17)
-out = Dense(nb_classes, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17)
+out = Dense(nb_classes, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17_drop)
 
 model = Model(input=inputYUV, output=out)
 
@@ -421,9 +415,6 @@ model.compile(loss='categorical_crossentropy',
 
 if show_summary:
     print(model.summary())
-
-if plot_model:
-    plot(model, show_shapes=show_shapes, to_file=plot_file)
 
 if not data_augmentation:
     print('Not using data augmentation.')

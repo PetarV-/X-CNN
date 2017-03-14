@@ -11,18 +11,12 @@ from keras.layers import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.normalization import BatchNormalization
 from keras.optimizers import Adam
 from keras.regularizers import l2
-from keras.utils.visualize_util import plot
 from utils.preprocess import get_cifar
 
 batch_size = 128
 nb_classes = 10
 nb_epoch = 230
 data_augmentation = True
-
-# plot the model?
-plot_model = True
-show_shapes = True
-plot_file = 'cifar10_fitnet.png'
 
 # show the summary?
 show_summary = True
@@ -46,8 +40,8 @@ inputNorm = BatchNormalization(axis=1)(inputYUV)
 input_drop = Dropout(0.2)(inputNorm)
 
 # This is a single convolutional maxout layer.
-h0_conv_a = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputYUV)
-h0_conv_b = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(inputYUV)
+h0_conv_a = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(input_drop)
+h0_conv_b = Convolution2D(32, 3, 3, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(input_drop)
 h0_conv = merge([h0_conv_a, h0_conv_b], mode='max', concat_axis=1)
 h0_conv = BatchNormalization(axis=1)(h0_conv)
 
@@ -144,7 +138,7 @@ h16 = Flatten()(h16_drop)
 h17 = MaxoutDense(500, nb_feature=5, init='glorot_uniform', W_regularizer=l2(0.0005))(h16)
 h17 = BatchNormalization(axis=1)(h17)
 h17_drop = Dropout(0.2)(h17)
-out = Dense(nb_classes, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17)
+out = Dense(nb_classes, activation='softmax', init='glorot_uniform', W_regularizer=l2(0.0005))(h17_drop)
 
 model = Model(input=inputYUV, output=out)
 
@@ -154,9 +148,6 @@ model.compile(loss='categorical_crossentropy',
 
 if show_summary:
     print(model.summary())
-
-if plot_model:
-    plot(model, show_shapes=show_shapes, to_file=plot_file)
 
 if not data_augmentation:
     print('Not using data augmentation.')
