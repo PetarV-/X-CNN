@@ -145,7 +145,7 @@ U_to_U = BatchNormalization(axis=1)(U_to_U)
 V_to_V_a = Convolution2D(18, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_V_b = Convolution2D(18, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_V = merge([V_to_V_a, V_to_V_b], mode='max', concat_axis=1)
-V_to_V = BatchNormalization(axis=1)(Y_to_Y)
+V_to_V = BatchNormalization(axis=1)(V_to_V)
 
 # Cross connections: Y <-> U, Y <-> V
 Y_to_UV_a = Convolution2D(12, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
@@ -279,7 +279,7 @@ U_to_U = BatchNormalization(axis=1)(U_to_U)
 V_to_V_a = Convolution2D(30, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_V_b = Convolution2D(30, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolV)
 V_to_V = merge([V_to_V_a, V_to_V_b], mode='max', concat_axis=1)
-V_to_V = BatchNormalization(axis=1)(Y_to_Y)
+V_to_V = BatchNormalization(axis=1)(V_to_V)
 
 # Cross connections: Y <-> U, Y <-> V
 Y_to_UV_a = Convolution2D(18, 1, 1, border_mode='same', init='glorot_uniform', W_regularizer=l2(0.0005))(poolY)
